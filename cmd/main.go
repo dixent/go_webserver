@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"go_webserver/db"
+	"go_webserver/config"
+	"go_webserver/config/db"
 	"go_webserver/internal/shop/models"
 	"go_webserver/internal/shop/repositories"
 	"log"
@@ -10,6 +11,7 @@ import (
 )
 
 func main() {
+	config.InitEnvironment()
 	db.Connection = db.InitConnection()
 
 	getShops()

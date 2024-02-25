@@ -1,20 +1,26 @@
 DB_CONTAINER_NAME = go_webserver-postgres-1
 DB_USER = postgres
-DB_NAME = go_webserver
+DB_PASSWORD = postgres
+DB_ENV = development
+DB_NAME = go_webserver_$(DB_ENV)
 
 db/migrate/new:
 	migrate create -ext sql -dir db/migrations/ -seq $(NAME)
-db/migrate/up: db/schema
-	migrate -path db/migrations/ -database "postgresql://postgres:postgres@localhost:5432/go_webserver?sslmode=disable" -verbose up
-db/migrate/down: db/schema
-	migrate -path db/migrations/ -database "postgresql://postgres:postgres@localhost:5432/go_webserver?sslmode=disable" -verbose down
-db/migrate/goto: db/schema
-	migrate -path db/migrations/ -database "postgresql://postgres:postgres@localhost:5432/go_webserver?sslmode=disable" goto $(VERSION)
+db/migrate/up:
+	migrate -path db/migrations/ -database "postgresql://$(DB_USER):$(DB_PASSWORD)@localhost:5432/${DB_NAME}?sslmode=disable" -verbose up
+	make db/schema
+db/migrate/down:
+	migrate -path db/migrations/ -database "postgresql://$(DB_USER):$(DB_PASSWORD)@localhost:5432/${DB_NAME}?sslmode=disable" -verbose down
+	make db/schema
+db/migrate/goto:
+	migrate -path db/migrations/ -database "postgresql://$(DB_USER):$(DB_PASSWORD)@localhost:5432/${DB_NAME}?sslmode=disable" goto $(VERSION)
+	make db/schema
 db/migrate/fix:
-	migrate -path db/migrations/ -database "postgresql://postgres:postgres@localhost:5432/go_webserver?sslmode=disable" force $(VERSION)
+	migrate -path db/migrations/ -database "postgresql://$(DB_USER):$(DB_PASSWORD)@localhost:5432/${DB_NAME}?sslmode=disable" force $(VERSION)
 db/drop:
 	docker exec -it $(DB_CONTAINER_NAME) dropdb -U $(DB_USER) $(DB_NAME)
-db/create: db/schema
+db/create:
 	docker exec -it $(DB_CONTAINER_NAME) createdb -U $(DB_USER) $(DB_NAME)
+	make db/schema
 db/schema:
-	docker exec -it go_webserver-postgres-1 pg_dump -U postgres --dbname=go_webserver --schema-only --no-owner --no-acl > db/schema.sql
+	docker exec -it $(DB_CONTAINER_NAME) pg_dump -U postgres --dbname=$(DB_NAME) --schema-only --no-owner --no-acl > db/schema.sql

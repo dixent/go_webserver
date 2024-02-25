@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"fmt"
-	"go_webserver/db"
+	"go_webserver/config/db"
 	"go_webserver/internal/shop/models"
 	"log"
 	"strconv"

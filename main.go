@@ -3,13 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
-	"go_webserver/db"
+	"go_webserver/config"
+	"go_webserver/config/db"
 	"go_webserver/internal/shop"
 	"log"
 	"net/http"
 )
 
 func main() {
+	config.InitEnvironment()
 	db.Connection = db.InitConnection()
 
 	port := flag.Int("port", 3000, "the http port")
