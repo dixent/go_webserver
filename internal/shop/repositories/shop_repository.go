@@ -29,6 +29,18 @@ func CreateShop(ownerId int64, shop *models.Shop) (int64, error) {
 	return id, nil
 }
 
+func GetShops() ([]models.Shop, error) {
+	shops := []models.Shop{}
+	err := db.Connection.Select(&shops, "SELECT * FROM shops")
+
+	if err != nil {
+		log.Printf("Error getting shops")
+		return nil, err
+	}
+
+	return shops, nil
+}
+
 func GetShopByIds(ids []int64) ([]models.Shop, error) {
 	shops := []models.Shop{}
 
@@ -43,8 +55,8 @@ func GetShopByIds(ids []int64) ([]models.Shop, error) {
 	err := db.Connection.Select(&shops, query)
 
 	if err != nil {
-		log.Printf("fail to get shops")
-		panic(err)
+		log.Printf("Error getting shops by ids")
+		return nil, err
 	}
 
 	return shops, nil

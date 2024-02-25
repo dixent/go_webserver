@@ -12,6 +12,23 @@ import (
 func main() {
 	db.Connection = db.InitConnection()
 
+	getShops()
+
+	defer db.Connection.Close()
+}
+
+func getShops() {
+	if shops, err := repositories.GetShops(); err != nil {
+		log.Println("Error getting shops")
+		panic(err)
+	} else {
+		for _, shop := range shops {
+			log.Printf("%+v\n", shop)
+		}
+	}
+}
+
+func showUsers() {
 	if users, err := repositories.GetUsersWithShops2Queries(); err != nil {
 		log.Println("Error getting users with shops")
 		panic(err)
@@ -20,8 +37,6 @@ func main() {
 			log.Printf("%+v\n", user)
 		}
 	}
-
-	defer db.Connection.Close()
 }
 
 func initShopsForUsers() {
