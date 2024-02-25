@@ -8,8 +8,10 @@ db/migrate/up: db/schema
 	migrate -path db/migrations/ -database "postgresql://postgres:postgres@localhost:5432/go_webserver?sslmode=disable" -verbose up
 db/migrate/down: db/schema
 	migrate -path db/migrations/ -database "postgresql://postgres:postgres@localhost:5432/go_webserver?sslmode=disable" -verbose down
+db/migrate/goto: db/schema
+	migrate -path db/migrations/ -database "postgresql://postgres:postgres@localhost:5432/go_webserver?sslmode=disable" goto $(VERSION)
 db/migrate/fix:
-	migrate -path db/migrations/ -database "postgresql://postgres:postgres@localhost:5432/go_webserver?sslmode=disable" force VERSION
+	migrate -path db/migrations/ -database "postgresql://postgres:postgres@localhost:5432/go_webserver?sslmode=disable" force $(VERSION)
 db/drop:
 	docker exec -it $(DB_CONTAINER_NAME) dropdb -U $(DB_USER) $(DB_NAME)
 db/create: db/schema
