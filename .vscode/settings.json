@@ -1,0 +1,14 @@
+{
+  "workbench.colorTheme": "Atom One Dark",
+  "editor.letterSpacing": 0.5,
+  "editor.lineHeight": 1.5,
+  "editor.fontSize": 16,
+  "cSpell.words": [
+    "dbname",
+    "godotenv",
+    "jmoiron",
+    "sqlx",
+    "sslmode",
+    "webserver"
+  ]
+}
