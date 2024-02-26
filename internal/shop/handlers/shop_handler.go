@@ -3,7 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"go_webserver/internal/shop/models"
-	"go_webserver/internal/shop/repositories"
+	"go_webserver/internal/shop/repositories/pg"
 	"log"
 	"net/http"
 )
@@ -27,7 +27,8 @@ func (h ShopHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func indexAction(w http.ResponseWriter, r *http.Request) {
-	if shops, err := repositories.GetShops(); err == nil {
+	repo := pg.NewShopRepository()
+	if shops, err := repo.GetShops(); err == nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		log.Println("Shops:", shops)
@@ -47,7 +48,8 @@ func createAction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if shopId, err := repositories.CreateShop(shop.OwnerId, &shop); err == nil {
+	repo := pg.NewShopRepository()
+	if shopId, err := repo.CreateShop(shop.OwnerId, &shop); err == nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(shopId)

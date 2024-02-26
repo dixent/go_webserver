@@ -1,4 +1,4 @@
-package repositories
+package pg
 
 import (
 	"fmt"
@@ -9,7 +9,13 @@ import (
 	"strings"
 )
 
-func CreateShop(ownerId int64, shop *models.Shop) (int64, error) {
+type ShopRepository struct{}
+
+func NewShopRepository() *ShopRepository {
+	return &ShopRepository{}
+}
+
+func (r *ShopRepository) CreateShop(ownerId int64, shop *models.Shop) (int64, error) {
 	rows, err := db.Connection.NamedQuery(
 		fmt.Sprintf("INSERT INTO shops (name, owner_id) VALUES (:name, %d) RETURNING id", ownerId),
 		&shop,
@@ -29,7 +35,7 @@ func CreateShop(ownerId int64, shop *models.Shop) (int64, error) {
 	return id, nil
 }
 
-func GetShops() ([]models.Shop, error) {
+func (r *ShopRepository) GetShops() ([]models.Shop, error) {
 	shops := []models.Shop{}
 	err := db.Connection.Select(&shops, "SELECT * FROM shops")
 
@@ -41,7 +47,7 @@ func GetShops() ([]models.Shop, error) {
 	return shops, nil
 }
 
-func GetShopByIds(ids []int64) ([]models.Shop, error) {
+func (r *ShopRepository) GetShopByIds(ids []int64) ([]models.Shop, error) {
 	shops := []models.Shop{}
 
 	queryIds := make([]string, len(ids))

@@ -5,7 +5,7 @@ import (
 	"go_webserver/config"
 	"go_webserver/config/db"
 	"go_webserver/internal/shop/models"
-	"go_webserver/internal/shop/repositories"
+	"go_webserver/internal/shop/repositories/pg"
 	"log"
 	"math/rand"
 )
@@ -20,7 +20,8 @@ func main() {
 }
 
 func getShops() {
-	if shops, err := repositories.GetShops(); err != nil {
+	repo := pg.NewShopRepository()
+	if shops, err := repo.GetShops(); err != nil {
 		log.Println("Error getting shops")
 		panic(err)
 	} else {
@@ -31,7 +32,8 @@ func getShops() {
 }
 
 func showUsers() {
-	if users, err := repositories.GetUsersWithShops2Queries(); err != nil {
+	repo := pg.NewUserRepository()
+	if users, err := repo.GetUsersWithShops2Queries(); err != nil {
 		log.Println("Error getting users with shops")
 		panic(err)
 	} else {
@@ -42,7 +44,9 @@ func showUsers() {
 }
 
 func initShopsForUsers() {
-	users, err := repositories.GetUsers()
+	userRepo := pg.NewUserRepository()
+	shopRepo := pg.NewShopRepository()
+	users, err := userRepo.GetUsers()
 
 	if err != nil {
 		log.Println("Error getting users")
@@ -50,25 +54,27 @@ func initShopsForUsers() {
 	}
 
 	for _, user := range users {
-		repositories.CreateShop(user.Id, &models.Shop{Name: fmt.Sprintf("%s's shop", user.Email)})
-		repositories.CreateShop(user.Id, &models.Shop{Name: fmt.Sprintf("%s's shop test", user.Email)})
+		shopRepo.CreateShop(user.Id, &models.Shop{Name: fmt.Sprintf("%s's shop", user.Email)})
+		shopRepo.CreateShop(user.Id, &models.Shop{Name: fmt.Sprintf("%s's shop test", user.Email)})
 	}
 }
 
 func createUser() {
+	repo := pg.NewUserRepository()
+
 	user := models.User{
 		Email:    fmt.Sprintf("test%d@gmail.com", rand.Intn(1000)),
 		Password: "test_password",
 	}
 
-	userId, err := repositories.CreateUser(&user)
+	userId, err := repo.CreateUser(&user)
 
 	if err != nil {
 		log.Println("Error creating user")
 		panic(err)
 	}
 
-	if user, err := repositories.GetUserById(userId); err != nil {
+	if user, err := repo.GetUserById(userId); err != nil {
 		log.Println("Error getting user")
 		panic(err)
 	} else {
