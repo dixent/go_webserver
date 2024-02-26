@@ -1,16 +1,20 @@
-package db
+package postgres
 
 import (
+	"fmt"
 	"log"
 	"os"
-	"fmt"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
-var Connection *sqlx.DB
+type Postgres struct {
+	*sqlx.DB
+}
 
-func InitConnection() *sqlx.DB {
+func NewPostgres() *Postgres {
+	// postgres
 	log.Println(os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"))
 	connParamsString := fmt.Sprintf(
 		"user=%s password=%s dbname=%s sslmode=disable",
@@ -25,5 +29,7 @@ func InitConnection() *sqlx.DB {
 		panic(err)
 	}
 
-	return conn
+	postgres := Postgres{conn}
+
+	return &postgres
 }

@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"go_webserver/internal/shop/models"
 	"go_webserver/internal/shop/repositories/pg"
+	"go_webserver/pkg/postgres"
 	"log"
 	"net/http"
 )
 
 type ShopHandler struct {
+	
 }
 
 func (h ShopHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -26,8 +28,10 @@ func (h ShopHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func indexAction(w http.ResponseWriter, r *http.Request) {
-	repo := pg.NewShopRepository()
+func indexAction(w http.ResponseWriter, _ *http.Request) {
+	postgres := postgres.NewPostgres()
+
+	repo := pg.NewShopRepository(postgres)
 	if shops, err := repo.GetShops(); err == nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -36,9 +40,12 @@ func indexAction(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 	}
+
+	defer postgres.Close()
 }
 
 func createAction(w http.ResponseWriter, r *http.Request) {
+	postgres := postgres.NewPostgres()
 	var shop models.Shop
 	decoder := json.NewDecoder(r.Body)
 
@@ -48,7 +55,7 @@ func createAction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	repo := pg.NewShopRepository()
+	repo := pg.NewShopRepository(postgres)
 	if shopId, err := repo.CreateShop(shop.OwnerId, &shop); err == nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -56,4 +63,6 @@ func createAction(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.WriteHeader(http.StatusCreated)
 	}
+
+	defer postgres.Close()
 }

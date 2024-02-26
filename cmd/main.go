@@ -3,24 +3,33 @@ package main
 import (
 	"fmt"
 	"go_webserver/config"
-	"go_webserver/config/db"
 	"go_webserver/internal/shop/models"
+	"go_webserver/internal/shop/repositories"
 	"go_webserver/internal/shop/repositories/pg"
+	"go_webserver/pkg/postgres"
 	"log"
 	"math/rand"
 )
 
 func main() {
 	config.InitEnvironment()
-	db.Connection = db.InitConnection()
+	log.Println("I am here")
+	postgres := postgres.NewPostgres()
 
-	getShops()
+	shopRepo := pg.NewShopRepository(postgres)
+	userRepo := pg.NewUserRepository(postgres)
 
-	defer db.Connection.Close()
+	createUser(userRepo)
+	createUser(userRepo)
+	createUser(userRepo)
+	initShopsForUsers(userRepo, shopRepo)
+	getShops(shopRepo)
+	showUsers(userRepo)
+
+	defer postgres.Close()
 }
 
-func getShops() {
-	repo := pg.NewShopRepository()
+func getShops(repo repositories.ShopRepository) {
 	if shops, err := repo.GetShops(); err != nil {
 		log.Println("Error getting shops")
 		panic(err)
@@ -31,8 +40,7 @@ func getShops() {
 	}
 }
 
-func showUsers() {
-	repo := pg.NewUserRepository()
+func showUsers(repo repositories.UserRepository) {
 	if users, err := repo.GetUsersWithShops2Queries(); err != nil {
 		log.Println("Error getting users with shops")
 		panic(err)
@@ -43,9 +51,7 @@ func showUsers() {
 	}
 }
 
-func initShopsForUsers() {
-	userRepo := pg.NewUserRepository()
-	shopRepo := pg.NewShopRepository()
+func initShopsForUsers(userRepo repositories.UserRepository, shopRepo repositories.ShopRepository) {
 	users, err := userRepo.GetUsers()
 
 	if err != nil {
@@ -59,9 +65,7 @@ func initShopsForUsers() {
 	}
 }
 
-func createUser() {
-	repo := pg.NewUserRepository()
-
+func createUser(repo repositories.UserRepository) {
 	user := models.User{
 		Email:    fmt.Sprintf("test%d@gmail.com", rand.Intn(1000)),
 		Password: "test_password",

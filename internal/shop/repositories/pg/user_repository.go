@@ -1,20 +1,21 @@
 package pg
 
 import (
-	"go_webserver/config/db"
 	"go_webserver/internal/shop/models"
+	"go_webserver/pkg/postgres"
 	"log"
 )
 
-type UserRepository struct{}
+type UserRepository struct {
+	*postgres.Postgres
+}
 
-
-func NewUserRepository() *UserRepository {
-	return &UserRepository{}
+func NewUserRepository(db *postgres.Postgres) *UserRepository {
+	return &UserRepository{db}
 }
 
 func (r *UserRepository) CreateUser(user *models.User) (int64, error) {
-	rows, err := db.Connection.NamedQuery(
+	rows, err := r.NamedQuery(
 		"INSERT INTO users (email, password) VALUES (:email, :password) RETURNING id",
 		&user,
 	)
@@ -35,13 +36,13 @@ func (r *UserRepository) CreateUser(user *models.User) (int64, error) {
 
 func (r *UserRepository) GetUserById(id int64) (*models.User, error) {
 	user := models.User{}
-	db.Connection.Get(&user, "SELECT * FROM users WHERE id = $1", id)
+	r.Get(&user, "SELECT * FROM users WHERE id = $1", id)
 	return &user, nil
 }
 
 func (r *UserRepository) GetUsers() ([]*models.User, error) {
 	users := []*models.User{}
-	err := db.Connection.Select(&users, "SELECT * FROM users")
+	err := r.Select(&users, "SELECT * FROM users")
 
 	if err != nil {
 		log.Println("Error getting users")
@@ -53,7 +54,7 @@ func (r *UserRepository) GetUsers() ([]*models.User, error) {
 
 func (r *UserRepository) GetUsersWithShops() ([]*models.User, error) {
 	users := []*models.User{}
-	rows, err := db.Connection.Queryx(
+	rows, err := r.Queryx(
 		`
 SELECT users.id, users.email, shops.id AS shop_id, shops.name AS shop_name
 FROM users JOIN shops ON users.id = shops.owner_id ORDER BY users.id
@@ -105,7 +106,7 @@ func (r *UserRepository) GetUsersWithShops2Queries() ([]*models.User, error) {
 		ownerIds[i] = user.Id
 	}
 
-	shopRepo := NewShopRepository()
+	shopRepo := NewShopRepository(r.Postgres)
 	shops, err := shopRepo.GetShopByIds(ownerIds)
 
 	if err != nil {

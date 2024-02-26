@@ -4,7 +4,7 @@ import "go_webserver/internal/shop/models"
 
 type ShopRepository interface {
 	CreateShop(int64, *models.Shop) (int64, error)
-	GetShops(int64, *models.Shop) ([]models.Shop, error)
+	GetShops() ([]models.Shop, error)
 	GetShopByIds([]int64) ([]models.Shop, error)
 }
 

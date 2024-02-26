@@ -2,21 +2,23 @@ package pg
 
 import (
 	"fmt"
-	"go_webserver/config/db"
 	"go_webserver/internal/shop/models"
+	"go_webserver/pkg/postgres"
 	"log"
 	"strconv"
 	"strings"
 )
 
-type ShopRepository struct{}
+type ShopRepository struct {
+	*postgres.Postgres
+}
 
-func NewShopRepository() *ShopRepository {
-	return &ShopRepository{}
+func NewShopRepository(db *postgres.Postgres) *ShopRepository {
+	return &ShopRepository{db}
 }
 
 func (r *ShopRepository) CreateShop(ownerId int64, shop *models.Shop) (int64, error) {
-	rows, err := db.Connection.NamedQuery(
+	rows, err := r.NamedQuery(
 		fmt.Sprintf("INSERT INTO shops (name, owner_id) VALUES (:name, %d) RETURNING id", ownerId),
 		&shop,
 	)
@@ -37,7 +39,7 @@ func (r *ShopRepository) CreateShop(ownerId int64, shop *models.Shop) (int64, er
 
 func (r *ShopRepository) GetShops() ([]models.Shop, error) {
 	shops := []models.Shop{}
-	err := db.Connection.Select(&shops, "SELECT * FROM shops")
+	err := r.Select(&shops, "SELECT * FROM shops")
 
 	if err != nil {
 		log.Printf("Error getting shops")
@@ -58,7 +60,7 @@ func (r *ShopRepository) GetShopByIds(ids []int64) ([]models.Shop, error) {
 
 	query := fmt.Sprintf("SELECT * FROM shops WHERE owner_id IN (%s)", strings.Join(queryIds, ","))
 
-	err := db.Connection.Select(&shops, query)
+	err := r.Select(&shops, query)
 
 	if err != nil {
 		log.Printf("Error getting shops by ids")

@@ -28,7 +28,11 @@ type Environment struct {
 func (env *Environment) loadEnvironment() {
 	gottenEnv := os.Getenv("ENV")
 
-	validateEnv(gottenEnv)
+	if gottenEnv == "" {
+		gottenEnv = "development"
+	} else {
+		validateEnv(gottenEnv)
+	}
 
 	env.name = gottenEnv
 }
