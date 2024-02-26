@@ -1,7 +1,7 @@
 package pg
 
 import (
-	"go_webserver/internal/shop/models"
+	"go_webserver/internal/shop/entities"
 	"go_webserver/pkg/postgres"
 	"log"
 )
@@ -14,7 +14,7 @@ func NewUserRepository(db *postgres.Postgres) *UserRepository {
 	return &UserRepository{db}
 }
 
-func (r *UserRepository) CreateUser(user *models.User) (int64, error) {
+func (r *UserRepository) CreateUser(user *entities.User) (int64, error) {
 	rows, err := r.NamedQuery(
 		"INSERT INTO users (email, password) VALUES (:email, :password) RETURNING id",
 		&user,
@@ -34,14 +34,14 @@ func (r *UserRepository) CreateUser(user *models.User) (int64, error) {
 	return id, nil
 }
 
-func (r *UserRepository) GetUserById(id int64) (*models.User, error) {
-	user := models.User{}
+func (r *UserRepository) GetUserById(id int64) (*entities.User, error) {
+	user := entities.User{}
 	r.Get(&user, "SELECT * FROM users WHERE id = $1", id)
 	return &user, nil
 }
 
-func (r *UserRepository) GetUsers() ([]*models.User, error) {
-	users := []*models.User{}
+func (r *UserRepository) GetUsers() ([]*entities.User, error) {
+	users := []*entities.User{}
 	err := r.Select(&users, "SELECT * FROM users")
 
 	if err != nil {
@@ -52,15 +52,15 @@ func (r *UserRepository) GetUsers() ([]*models.User, error) {
 	return users, nil
 }
 
-func (r *UserRepository) GetUsersWithShops() ([]*models.User, error) {
-	users := []*models.User{}
+func (r *UserRepository) GetUsersWithShops() ([]*entities.User, error) {
+	users := []*entities.User{}
 	rows, err := r.Queryx(
 		`
 SELECT users.id, users.email, shops.id AS shop_id, shops.name AS shop_name
 FROM users JOIN shops ON users.id = shops.owner_id ORDER BY users.id
 `,
 	)
-	var lastUser *models.User
+	var lastUser *entities.User
 
 	if err != nil {
 		log.Println("Error getting users with shops")
@@ -68,8 +68,8 @@ FROM users JOIN shops ON users.id = shops.owner_id ORDER BY users.id
 	}
 
 	for rows.Next() {
-		newUser := models.User{}
-		shop := models.Shop{}
+		newUser := entities.User{}
+		shop := entities.Shop{}
 		err := rows.Scan(
 			&newUser.Id, &newUser.Email, &shop.Id, &shop.Name,
 		)
@@ -93,7 +93,7 @@ FROM users JOIN shops ON users.id = shops.owner_id ORDER BY users.id
 	return users, nil
 }
 
-func (r *UserRepository) GetUsersWithShops2Queries() ([]*models.User, error) {
+func (r *UserRepository) GetUsersWithShops2Queries() ([]*entities.User, error) {
 	users, err := r.GetUsers()
 
 	if err != nil {
@@ -113,7 +113,7 @@ func (r *UserRepository) GetUsersWithShops2Queries() ([]*models.User, error) {
 		return nil, err
 	}
 
-	shopsByOwnerId := make(map[int64][]models.Shop)
+	shopsByOwnerId := make(map[int64][]entities.Shop)
 
 	for _, shop := range shops {
 		shopsByOwnerId[shop.OwnerId] = append(shopsByOwnerId[shop.OwnerId], shop)

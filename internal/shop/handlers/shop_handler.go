@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-	"go_webserver/internal/shop/models"
+	"go_webserver/internal/shop/entities"
 	"go_webserver/internal/shop/repositories/pg"
 	"go_webserver/pkg/postgres"
 	"log"
@@ -10,7 +10,6 @@ import (
 )
 
 type ShopHandler struct {
-	
 }
 
 func (h ShopHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +45,7 @@ func indexAction(w http.ResponseWriter, _ *http.Request) {
 
 func createAction(w http.ResponseWriter, r *http.Request) {
 	postgres := postgres.NewPostgres()
-	var shop models.Shop
+	var shop entities.Shop
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&shop); err != nil {

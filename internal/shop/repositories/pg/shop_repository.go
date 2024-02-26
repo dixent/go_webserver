@@ -2,7 +2,7 @@ package pg
 
 import (
 	"fmt"
-	"go_webserver/internal/shop/models"
+	"go_webserver/internal/shop/entities"
 	"go_webserver/pkg/postgres"
 	"log"
 	"strconv"
@@ -17,7 +17,7 @@ func NewShopRepository(db *postgres.Postgres) *ShopRepository {
 	return &ShopRepository{db}
 }
 
-func (r *ShopRepository) CreateShop(ownerId int64, shop *models.Shop) (int64, error) {
+func (r *ShopRepository) CreateShop(ownerId int64, shop *entities.Shop) (int64, error) {
 	rows, err := r.NamedQuery(
 		fmt.Sprintf("INSERT INTO shops (name, owner_id) VALUES (:name, %d) RETURNING id", ownerId),
 		&shop,
@@ -37,8 +37,8 @@ func (r *ShopRepository) CreateShop(ownerId int64, shop *models.Shop) (int64, er
 	return id, nil
 }
 
-func (r *ShopRepository) GetShops() ([]models.Shop, error) {
-	shops := []models.Shop{}
+func (r *ShopRepository) GetShops() ([]entities.Shop, error) {
+	shops := []entities.Shop{}
 	err := r.Select(&shops, "SELECT * FROM shops")
 
 	if err != nil {
@@ -49,8 +49,8 @@ func (r *ShopRepository) GetShops() ([]models.Shop, error) {
 	return shops, nil
 }
 
-func (r *ShopRepository) GetShopByIds(ids []int64) ([]models.Shop, error) {
-	shops := []models.Shop{}
+func (r *ShopRepository) GetShopByIds(ids []int64) ([]entities.Shop, error) {
+	shops := []entities.Shop{}
 
 	queryIds := make([]string, len(ids))
 

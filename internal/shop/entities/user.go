@@ -1,4 +1,4 @@
-package models
+package entities
 
 import "time"
 
@@ -8,5 +8,5 @@ type User struct {
 	Password  string    `db:"password"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
-	Shops 	  []Shop
+	Shops     []Shop
 }

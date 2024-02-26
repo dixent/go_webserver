@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"go_webserver/config"
-	"go_webserver/internal/shop/models"
+	"go_webserver/internal/shop/entities"
 	"go_webserver/internal/shop/repositories"
 	"go_webserver/internal/shop/repositories/pg"
 	"go_webserver/pkg/postgres"
@@ -60,13 +60,13 @@ func initShopsForUsers(userRepo repositories.UserRepository, shopRepo repositori
 	}
 
 	for _, user := range users {
-		shopRepo.CreateShop(user.Id, &models.Shop{Name: fmt.Sprintf("%s's shop", user.Email)})
-		shopRepo.CreateShop(user.Id, &models.Shop{Name: fmt.Sprintf("%s's shop test", user.Email)})
+		shopRepo.CreateShop(user.Id, &entities.Shop{Name: fmt.Sprintf("%s's shop", user.Email)})
+		shopRepo.CreateShop(user.Id, &entities.Shop{Name: fmt.Sprintf("%s's shop test", user.Email)})
 	}
 }
 
 func createUser(repo repositories.UserRepository) {
-	user := models.User{
+	user := entities.User{
 		Email:    fmt.Sprintf("test%d@gmail.com", rand.Intn(1000)),
 		Password: "test_password",
 	}
