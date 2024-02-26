@@ -1,9 +1,11 @@
 package config
 
 import (
-	"flag"
 	"fmt"
 	"log"
+	"os"
+	"strings"
+
 	"github.com/joho/godotenv"
 )
 
@@ -24,19 +26,27 @@ type Environment struct {
 }
 
 func (env *Environment) loadEnvironment() {
-	gottenEnv := flag.String("env", "development", "Environment name e.g. test, development, staging, production")
+	gottenEnv := os.Getenv("ENV")
 
-	validateEnv(*gottenEnv)
+	validateEnv(gottenEnv)
 
-	env.name = *gottenEnv
+	env.name = gottenEnv
 }
 
 func (env *Environment) loadEnvs() {
-	if err := godotenv.Load(fmt.Sprintf(".env.%s", env.name)); err != nil {
+	currentDir, err := os.Getwd()
+
+	if err != nil {
+		panic(err)
+	}
+
+	localDir := strings.Split(currentDir, "go_webserver")[0]
+
+	if err := godotenv.Load(fmt.Sprintf("%s/go_webserver/.env.%s", localDir, env.name)); err != nil {
 		log.Fatalf("Error loading %s file", fmt.Sprintf(".env.%s", env.name))
 	}
 
-	if err := godotenv.Load(".env"); err != nil {
+	if err := godotenv.Load(fmt.Sprintf("%s/go_webserver/.env", localDir)); err != nil {
 		log.Println("Error loading .env file")
 	}
 }

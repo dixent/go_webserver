@@ -15,6 +15,7 @@ func main() {
 	db.Connection = db.InitConnection()
 
 	port := flag.Int("port", 3000, "the http port")
+	flag.Parse()
 
 	mux := http.NewServeMux()
 	mux.Handle("/api/shops/", shop.Handler{})

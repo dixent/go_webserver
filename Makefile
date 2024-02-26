@@ -24,3 +24,5 @@ db/create:
 	make db/schema
 db/schema:
 	docker exec -it $(DB_CONTAINER_NAME) pg_dump -U postgres --dbname=$(DB_NAME) --schema-only --no-owner --no-acl > db/schema.sql
+test/run:
+	ENV=test go test ./...
