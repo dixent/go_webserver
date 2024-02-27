@@ -5,7 +5,7 @@ DB_ENV = development
 DB_NAME = go_webserver_$(DB_ENV)
 
 db/migrate/new:
-	migrate create -ext sql -dir db/migrations/ -seq $(NAME)
+	migrate create -ext sql -dir db/migrations/ $(NAME)
 db/migrate/up:
 	migrate -path db/migrations/ -database "postgresql://$(DB_USER):$(DB_PASSWORD)@localhost:5432/${DB_NAME}?sslmode=disable" -verbose up
 	make db/schema
