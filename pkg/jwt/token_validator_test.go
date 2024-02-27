@@ -21,27 +21,35 @@ func TestEncryptTokenSuccess(t *testing.T) {
 	token, err := validator.EncryptToken(&MockSource{})
 
 	if err != nil {
-		t.Errorf(`ERROR != nil; must be nil`)
+		t.Errorf(`err IS NOT nil; EXPECT nil`)
 	}
 
 	if token == "" {
-		t.Errorf(`TOKEN = ""; must be not ""`)
+		t.Errorf(`token IS ""; EXPECT not ""`)
 	}
 }
 
 func TestVerifyTokenSuccess(t *testing.T) {
 	token, _ := validator.EncryptToken(&MockSource{})
-	err := validator.VerifyToken(token)
+	userId, err := validator.VerifyToken(token)
 
 	if err != nil {
-		t.Errorf(`ERROR is not nil; must be nil`)
+		t.Errorf(`err IS %s; EXPECT nil`, err)
+	}
+
+	if userId != 1 {
+		t.Errorf(`userId IS %d; EXPECT 1`, userId)
 	}
 }
 
 func TestVerifyTokenFailure(t *testing.T) {
-	err := validator.VerifyToken("invalid token")
+	userId, err := validator.VerifyToken("invalid token")
 
 	if err == nil {
-		t.Errorf(`ERROR is nil; must be "token is malformed: token contains an invalid number of segments"`)
+		t.Errorf(`err IS nil; EXPECT "token is malformed: token contains an invalid number of segments"`)
+	}
+
+	if userId == 1 {
+		t.Errorf(`userId IS 1; EXPECT 0`)
 	}
 }

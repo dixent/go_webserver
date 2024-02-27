@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"errors"
 	"log"
 	"os"
 	"time"
@@ -10,6 +11,12 @@ import (
 
 type TokenValidator struct {
 	SecretKey []byte
+}
+
+type Claims struct {
+	Id    int64  `json:"id"`
+	Email string `json:"email"`
+	jwt.MapClaims
 }
 
 func NewTokenValidator() *TokenValidator {
@@ -38,15 +45,23 @@ func (tv *TokenValidator) EncryptToken(source Source) (string, error) {
 	return tokenString, nil
 }
 
-func (tv *TokenValidator) VerifyToken(tokenString string) error {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+func (tv *TokenValidator) VerifyToken(tokenString string) (int64, error) {
+	var userId int64
+
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (any, error) {
 		return tv.SecretKey, nil
 	})
 
 	if err != nil || !token.Valid {
 		log.Println("Failed verify token", err)
-		return err
+		return userId, err
 	}
 
-	return nil
+	claims, ok := token.Claims.(*Claims)
+
+	if !ok {
+		return userId, errors.New("failed parsing claims")
+	}
+
+	return claims.Id, nil
 }
