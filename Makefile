@@ -23,7 +23,9 @@ db/create:
 	docker exec -it $(DB_CONTAINER_NAME) createdb -U $(DB_USER) $(DB_NAME)
 	make db/schema
 db/schema:
+ifeq ($(DB_ENV), "development")
 	docker exec -it $(DB_CONTAINER_NAME) pg_dump -U postgres --dbname=$(DB_NAME) --schema-only --no-owner --no-acl > db/schema.sql
+endif
 db/setup:
 	make db/create
 	make db/migrate/up
