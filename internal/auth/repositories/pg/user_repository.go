@@ -7,25 +7,25 @@ import (
 )
 
 type UserRepository struct {
-	*postgres.Postgres
+	db *postgres.Postgres
 }
 
 func NewUserRepository(db *postgres.Postgres) *UserRepository {
 	return &UserRepository{db}
 }
 
-func (r *UserRepository) GetByAuth(session *entities.Auth) entities.User {
+func (r *UserRepository) GetByAuth(auth *entities.Auth) entities.User {
 	var user entities.User
 
-	err := r.Get(
+	err := r.db.Get(
 		&user,
 		"SELECT id, email, password FROM users WHERE email = $1 AND password = $2",
-		session.Email,
-		session.Password,
+		auth.Email,
+		auth.Password,
 	)
 
 	if err != nil {
-		log.Println("Failed getting user by session", err)
+		log.Println("Failed getting user by auth", err)
 	}
 
 	return user
